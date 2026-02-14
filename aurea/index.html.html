@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auréa | Soft Luxury</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+body {
+margin: 0;
+font-family: 'Inter', sans-serif;
+background: #F9F6F2;
+color: #5A4A42;
+}
+
+h1,h2,h3 {
+font-family: 'Playfair Display', serif;
+}
+
+header {
+padding: 30px 60px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.logo {
+font-size: 28px;
+color: #C9A24D;
+font-weight: 600;
+}
+
+.cart-icon {
+cursor: pointer;
+font-weight: 500;
+}
+
+.btn {
+background: #C9A24D;
+color: white;
+padding: 10px 22px;
+border: none;
+cursor: pointer;
+margin-top: 10px;
+border-radius: 30px;
+letter-spacing: 1px;
+transition: 0.3s;
+}
+
+.btn:hover {
+opacity: 0.85;
+}
+
+.products {
+display: flex;
+justify-content: center;
+gap: 40px;
+padding: 60px 20px;
+flex-wrap: wrap;
+}
+
+.product {
+width: 260px;
+background: white;
+padding: 20px;
+text-align: center;
+border-radius: 10px;
+transition: 0.3s;
+}
+
+.product:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.product img {
+width: 100%;
+border-radius: 8px;
+}
+
+.cart {
+position: fixed;
+right: -400px;
+top: 0;
+width: 350px;
+height: 100%;
+background: white;
+box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+padding: 20px;
+transition: 0.4s;
+overflow-y: auto;
+z-index: 999;
+}
+
+.cart.active {
+right: 0;
+}
+
+.checkout-form input, .checkout-form select {
+width: 100%;
+padding: 8px;
+margin-bottom: 10px;
+border: 1px solid #ddd;
+border-radius: 5px;
+}
+
+.remove-btn {
+border: none;
+background: none;
+cursor: pointer;
+float: right;
+}
+
+.quantity-controls {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 8px;
+margin-top: 5px;
+}
+
+.qty-btn {
+padding: 2px 8px;
+border: none;
+background: #eee;
+cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">Auréa</div>
+<div class="cart-icon" onclick="toggleCart()">🛍 Cart (<span id="cartCount">0</span>)</div>
+</header>
+
+<section class="products">
+
+<div class="product">
+<img src="https://via.placeholder.com/260x260">
+<h3>Signature Ring</h3>
+<p>AED 119</p>
+<button class="btn" onclick="addToCart('Signature Ring',119)">Add to Cart</button>
+</div>
+
+<div class="product">
+<img src="https://via.placeholder.com/260x260">
+<h3>Minimal Necklace</h3>
+<p>AED 149</p>
+<button class="btn" onclick="addToCart('Minimal Necklace',149)">Add to Cart</button>
+</div>
+
+</section>
+
+<div class="cart" id="cart">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<hr>
+
+<div class="checkout-form">
+<h3>Checkout</h3>
+<input type="text" id="name" placeholder="Full Name">
+<input type="text" id="phone" placeholder="Phone Number">
+<input type="text" id="address" placeholder="Delivery Address">
+
+<select id="paymentMethod">
+<option value="COD">Cash on Delivery</option>
+<option value="Bank Transfer">Bank Transfer</option>
+</select>
+
+<button class="btn" onclick="placeOrder()">Place Order</button>
+
+<div id="bankDetails" style="display:none; margin-top:15px; font-size:14px;">
+<p><strong>Bank Transfer Details:</strong></p>
+<p>Account Name: [Parent Name]</p>
+<p>Bank: [Bank Name]</p>
+<p>Account Number: XXXX XXXX XXXX</p>
+<p>Please send payment screenshot on WhatsApp after transfer.</p>
+</div>
+
+</div>
+</div>
+
+<script>
+let cart = {};
+
+function addToCart(name, price){
+if(cart[name]){
+cart[name].qty += 1;
+} else {
+cart[name] = {price: price, qty: 1};
+}
+renderCart();
+}
+
+function renderCart(){
+let cartHTML = "";
+let total = 0;
+let totalItems = 0;
+
+for(let item in cart){
+let product = cart[item];
+let itemTotal = product.price * product.qty;
+total += itemTotal;
+totalItems += product.qty;
+
+cartHTML += `
+<p>
+<strong>${item}</strong> - AED ${product.price}
+<button class="remove-btn" onclick="removeItem('${item}')">❌</button>
+</p>
+<div class="quantity-controls">
+<button class="qty-btn" onclick="changeQty('${item}', -1)">-</button>
+<span>${product.qty}</span>
+<button class="qty-btn" onclick="changeQty('${item}', 1)">+</button>
+</div>
+<p>Subtotal: AED ${itemTotal}</p>
+<hr>
+`;
+}
+
+cartHTML += `<strong>Total: AED ${total}</strong>`;
+document.getElementById("cartItems").innerHTML = cartHTML;
+document.getElementById("cartCount").innerText = totalItems;
+}
+
+function changeQty(name, amount){
+cart[name].qty += amount;
+if(cart[name].qty <= 0){
+delete cart[name];
+}
+renderCart();
+}
+
+function removeItem(name){
+delete cart[name];
+renderCart();
+}
+
+function toggleCart(){
+document.getElementById("cart").classList.toggle("active");
+}
+
+function placeOrder(){
+
+if(Object.keys(cart).length === 0){
+alert("Your cart is empty.");
+return;
+}
+
+let name = document.getElementById("name").value;
+let phone = document.getElementById("phone").value;
+let address = document.getElementById("address").value;
+let payment = document.getElementById("paymentMethod").value;
+
+if(!name || !phone || !address){
+alert("Please fill all details.");
+return;
+}
+
+let orderDetails = "";
+let total = 0;
+
+for(let item in cart){
+let product = cart[item];
+orderDetails += `${item} (x${product.qty}), `;
+total += product.price * product.qty;
+}
+
+let message = `New Order from Auréa:%0AName: ${name}%0APhone: ${phone}%0AAddress: ${address}%0AItems: ${orderDetails}%0ATotal: AED ${total}%0APayment: ${payment}`;
+
+if(payment === "Bank Transfer"){
+document.getElementById("bankDetails").style.display = "block";
+alert("Please complete the bank transfer and send screenshot on WhatsApp.");
+}
+
+window.location.href = `https://wa.me/971563228762?text=${message}`;
+
+cart = {};
+renderCart();
+document.getElementById("name").value = "";
+document.getElementById("phone").value = "";
+document.getElementById("address").value = "";
+}
+</script>
+
+</body>
+</html>
